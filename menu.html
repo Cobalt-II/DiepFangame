@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Grid Game</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <p style="font-size: 30px">Blaster Game</p>
+    <button id = "f">Play</button>
+    <label for="name">Player name:</label>
+    <input type="text" id="name" name="name" maxlength="24">
+  <script>
+document.getElementById('f').onclick = function() {
+    location.href = "/html/game.html";
+    localStorage.name = document.getElementById('name').value;
+};
+
+if (!localStorage.name) {
+localStorage.name = "";
+}
+
+document.getElementById('name').value = localStorage.name;
+  </script>
+  </body>
+</html>

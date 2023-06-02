@@ -1,2 +1,3 @@
-# DiepFangame
-Little fangame for diep.io.
+# Blaster-Game
+
+Little game based off of Diep.io
