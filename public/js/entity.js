@@ -1,12 +1,32 @@
 export let entities = [];
 export let id = 1;
-export let dead = 0;
+let dead = 0;
+export let mode = "vanquish";
+export let managegame = {
+    score: [0, 0],
+    killcount: 1500,
+    tick: 0
+};
+let matchEnded = 0;
 
 // Config values
 let bulletLife = 90;
 export let size = 2000;
+export let player = {
+    team: 1
+};
+let spawn = getPos();
+let spawnref = getPos;
 
-import {bodies, playersize} from "/js/storedentities.js";
+import {
+    bodies,
+    playersize
+} from "/js/storedentities.js";
+import {
+    pushNote
+} from "/js/notifications.js";
+
+pushNote('Welcome to the game!', 3);
 
 class ent {
     constructor(type, team, x, y, name, size, health, damage, speed, regen, reloads, barrels, behaviors, angle, parent) {
@@ -44,6 +64,10 @@ function getPos() {
     return [Math.random() * size, Math.random() * size];
 };
 
+function getPos2tdm(team) {
+    return [Math.random() * size / 2 + size / 2 * team, Math.random() * size];
+}
+
 function pushbody(a, x, y, t) {
     for (let count in bodies) {
         if (bodies[count][1] === a) {
@@ -51,6 +75,13 @@ function pushbody(a, x, y, t) {
         }
     }
     return pushEnt(a[0], t, x, y, a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11]);
+};
+
+function endMatch() {
+    setTimeout(() => {
+        location.href = '/';
+    }, 5000);
+    matchEnded = 1;
 };
 
 function collision(x1, x2, y1, y2, r1, r2) {
@@ -82,7 +113,7 @@ function getEnts(target, teamType, wantBullets) {
 function findTeams(nottoinclude) {
     let teams = [];
     for (let count in entities) {
-        if (teams.indexOf(entities[count].team) === -1 && entities[count].team !== nottoinclude) {
+        if (teams.indexOf(entities[count].team) === -1 && nottoinclude.indexOf(entities[count].team) === -1) {
             teams.push(entities[count].team)
         };
     }
@@ -97,11 +128,24 @@ function search(data) {
     }
 };
 
-function shoot(entity, damage, speed) {
+function setbasetdm(onsize) {
+    setInterval(() => {
+        for (let cou = 0; cou < 2; cou++) {
+            let o = Math.random() * size / 2 + size / 2 * cou;
+            if (getEnts({
+                    x: 0,
+                    y: 0,
+                    id: -1
+                }, findTeams([Number(!cou)]), 0).length <= onsize) pushbody('bot', o, Math.random() * size, cou);
+        }
+    });
+}
+
+function shoot(entity, damage, speed, health) {
     for (let count in entity.barrels) {
         let k = [-Math.cos(entity.facing + entity.barrels[count][0]), -Math.sin(entity.facing + entity.barrels[count][0])]
         if (!entity.barrels[count][2]) {
-            pushEnt('bullet', entity.team, entity.x, entity.y, '', entity.size / 2, 30, damage, speed, 0, 0, [], {}, k, entity.id);
+            pushEnt('bullet', entity.team, entity.x, entity.y, '', entity.size / 2, health, damage, speed, 0, 0, [], {}, k, entity.id);
         } else {
             pushbody(entity.barrels[count][2], entity.x, entity.y, entity.team);
         }
@@ -121,9 +165,43 @@ function filter(targets, fov) {
     if (targ > fov) return false;
     return choice;
 };
+let bosses = ['Mega-Flank', 'Mega-Quad'];
+switch (mode) {
+    case 'sandboxbosses':
+        let max = 5;
+        setInterval(() => {
+            if (getEnts({
+                    x: 0,
+                    y: 0,
+                    id: -1
+                }, findTeams([0]), 0).length <= max) pushbody(bosses[Math.floor(Math.random() * bosses.length)], size / 2, size / 2, 0);
+        }, 5000);
+        break;
+    case 'domination':
+        pushNote(`Destroy the enemy team's dominator to win.`, 4);
+        pushbody('dom', size / 4, size / 2, 0);
+        pushbody('dom', size / 4 * 3, size / 2, 1);
+        setbasetdm(10);
+        spawn = getPos2tdm(player.team);
+        spawnref = getPos2tdm;
+        break;
+    case 'vanquish':
+        pushNote(`Defeat enemy tanks to win.`, 4);
+        setbasetdm(30);
+        setInterval(() => {
+            for (let count = 0; count < 2; count++) {
+                if (Math.random() > 0.95) {
+                    pushNote(`The ${count ? 'green' : 'red'} team has a surperior ally on the field!`, 3);
+                    pushbody(bosses[Math.floor(Math.random() * bosses.length)], Math.random() * size / 2 + size / 2 * count, Math.random() * size, count);
+                }
+            }
+        }, 500);
+        spawn = getPos2tdm(player.team);
+        spawnref = getPos2tdm;
+        break;
+};
 
-let k = getPos();
-export let player = pushEnt('player', 1, k[0], k[1], localStorage.name, playersize, 100, 10, 4, 0.1, 15, [
+player = pushEnt('player', 1, spawn[0], spawn[1], localStorage.name, playersize, 100, 10, 4, 0.1, 15, [
     [0, 2 * playersize],
     [Math.PI / 4, 1.5 * playersize],
     [-Math.PI / 4, 1.5 * playersize],
@@ -131,7 +209,8 @@ export let player = pushEnt('player', 1, k[0], k[1], localStorage.name, playersi
     [-Math.PI / 8, 1.75 * playersize],
 ], {
     bdamage: 3,
-    bspeed: 7.5
+    bspeed: 7.5,
+    bhealth: 15
 });
 
 let Keys = {
@@ -140,6 +219,17 @@ let Keys = {
 };
 
 requestAnimationFrame(function run() {
+    managegame.tick++;
+    if (mode === 'vanquish' && !matchEnded) {
+        if (managegame.score[1] >= managegame.killcount) {
+            pushNote(`The red team has won the game!`, 3);
+            endMatch()
+        }
+        if (managegame.score[0] >= managegame.killcount) {
+            pushNote(`The green team has won the game!`, 3);
+            endMatch()
+        }
+    }
     for (let co = 0; co < Keys.values1.length; co++) {
         if (Keys.values1[co]) {
             switch (Keys.values[co]) {
@@ -157,20 +247,47 @@ requestAnimationFrame(function run() {
             }
         }
     }
-    if (player.health <= 0) {
+    if (player.health <= 0 && !dead) {
         dead = 1;
+        pushNote('You have been killed. You may respawn when this message expires.', 3);
         Keys = {
             values: [],
             values1: []
+        };
+        let o = function(e) {
+            if (e.code === 'Enter') {
+                dead = 0;
+                spawn = spawnref(player.team);
+                player = pushEnt('player', 1, spawn[0], spawn[1], localStorage.name, playersize, 100, 10, 4, 0.1, 15, [
+                    [0, 2 * playersize],
+                    [Math.PI / 4, 1.5 * playersize],
+                    [-Math.PI / 4, 1.5 * playersize],
+                    [Math.PI / 8, 1.75 * playersize],
+                    [-Math.PI / 8, 1.75 * playersize],
+                ], {
+                    bdamage: 3,
+                    bspeed: 7.5,
+                    bhealth: 15
+                });
+                Keys = {
+                    values: [0, 'KeyW', 'KeyS', 'KeyA', 'KeyD'],
+                    values1: [0, false, false, false, false]
+                };
+                document.removeEventListener('keypress', o)
+            }
         }
+        setTimeout(() => {
+            document.addEventListener('keypress', o);
+        }, 3000);
+
     }
     for (let count in entities) {
         entities[count].tick++;
         entities[count].reloading++;
         entities[count].facing = entities[count].facing % 6.28318530718;
-        let targett = getEnts(entities[count], findTeams(entities[count].team), 0);
+        let targett = getEnts(entities[count], findTeams([entities[count].team]), 0);
         let o = filter(targett, entities[count].behaviors.fov)
-        if (entities[count].reloading > entities[count].reloads && targett.length && o) shoot(entities[count], entities[count].behaviors.bdamage, entities[count].behaviors.bspeed);
+        if (entities[count].reloading > entities[count].reloads && targett.length && o) shoot(entities[count], entities[count].behaviors.bdamage, entities[count].behaviors.bspeed, entities[count].behaviors.bhealth);
         if (entities[count].type === "player" && entities[count].id !== player.id) {
             for (let cou in entities[count].behaviors) {
                 switch (entities[count].behaviors[cou]) {
@@ -178,7 +295,7 @@ requestAnimationFrame(function run() {
                         entities[count].facing += entities[count].behaviors.turnspeed * Math.PI;
                         break;
                     case 'face':
-                        let targett = getEnts(entities[count], findTeams(entities[count].team), 0);
+                        let targett = getEnts(entities[count], findTeams([entities[count].team]), 0);
                         if (targett.length) {
                             let choice = filter(targett, entities[count].behaviors.fov);
                             if (choice) {
@@ -186,7 +303,7 @@ requestAnimationFrame(function run() {
                                 if (k < 0) k = Math.PI + (Math.PI + k);
                                 let o = entities[count].facing;
                                 if (o < 0) o = Math.PI + (Math.PI + o);
-                                if (k < o + Math.PI / 256 && k < o - Math.PI / 256) {
+                                if (k < o + Math.PI / 64 && k < o - Math.PI / 64) {
                                     if (o - k <= Math.PI) {
                                         entities[count].facing -= entities[count].behaviors.turnspeed * Math.PI;
                                     }
@@ -194,7 +311,7 @@ requestAnimationFrame(function run() {
                                         entities[count].facing += entities[count].behaviors.turnspeed * Math.PI;
                                     }
                                 }
-                                if (k + Math.PI / 256 > o && k - Math.PI / 256 > o) {
+                                if (k + Math.PI / 64 > o && k - Math.PI / 64 > o) {
                                     if (k - o <= Math.PI) {
                                         entities[count].facing += entities[count].behaviors.turnspeed * Math.PI;
                                     }
@@ -205,8 +322,18 @@ requestAnimationFrame(function run() {
                             }
                         }
                         break;
+                    case 'instaface':
+                        let targettt = getEnts(entities[count], findTeams([entities[count].team]), 0);
+                        if (targettt.length) {
+                            let choice = filter(targettt, entities[count].behaviors.fov);
+                            if (choice) {
+                                let k = Math.atan2(entities[count].y - choice.y, entities[count].x - choice.x);
+                                entities[count].facing = k;
+                            }
+                        }
+                        break;
                     case 'chase':
-                        let targets = getEnts(entities[count], findTeams(entities[count].team), 0);
+                        let targets = getEnts(entities[count], findTeams([entities[count].team]), 0);
                         if (targets.length) {
                             let choice = filter(targets, entities[count].behaviors.fov);
                             if (choice) {
@@ -306,6 +433,23 @@ requestAnimationFrame(function run() {
                     }
                 }
             }
+            switch (mode) {
+                case 'domination':
+                    if (entities[count].name === 'dom') {
+                        let o = !entities[count].team ? 'green' : 'red';
+                        pushNote(`The ${o} team has won the game!`, 3);
+                        endMatch();
+                    }
+                    break;
+                case 'vanquish':
+                    if (entities[count].type === 'player') {
+                        if (entities[count].team) {
+                            managegame.score[1]++;
+                        } else {
+                            managegame.score[0]++;
+                        }
+                    }
+            }
             entities.splice(count, 1);
             continue;
         }
@@ -329,16 +473,6 @@ document.addEventListener("mousemove", function(event) {
     y = event.clientY;
     player.facing = Math.atan2(window.innerHeight / 2 - y, window.innerWidth / 2 - x);
 });
-
-let max = 5;
-let bosses = ['Mega-Flank', 'Mega-Quad']
-setInterval(() => {
-    if (getEnts({
-            x: 0,
-            y: 0,
-            id: -1
-        }, findTeams([0]), 0).length <= max) pushbody(bosses[Math.floor(Math.random() * bosses.length)], 1000, 1000, 0);
-}, 5000);
 
 
 
