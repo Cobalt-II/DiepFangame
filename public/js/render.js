@@ -1,12 +1,21 @@
 import {
     entities,
     player,
-    dead,
-    size
+    size,
+    mode,
+    managegame
 } from "/js/entity.js";
+import {
+    notifications
+} from "/js/notifications.js";
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+let font = {
+    size: 20,
+    type: "Arial"
+};
+ctx.font = `${font.size}px ${font.type}`;
 
 function getEntType(type) {
     let arr = [];
@@ -39,8 +48,8 @@ requestAnimationFrame(function draw() {
     }
     ctx.fillStyle = "#E2E2E2";
     ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-    for (let count = 0; count < size; count+=200) {
-        ctx.beginPath(); 
+    for (let count = 0; count < size; count += 200) {
+        ctx.beginPath();
         ctx.moveTo(0, (window.innerHeight / 2) - (player.y - count));
         ctx.lineTo(size, (window.innerHeight / 2) - (player.y - count));
         ctx.moveTo((window.innerWidth / 2) - (player.x - count), 0);
@@ -70,19 +79,20 @@ requestAnimationFrame(function draw() {
             }
         }
         switch (entities[count].team) {
-        case 0:
-        ctx.fillStyle = "#FF0000";
-        break;
-        case 1:
-        ctx.fillStyle = "#00FF00";
-        break;
-        case 2:
-        ctx.fillStyle = "#0000FF";
-        break;
-        case 3:
-        ctx.fillStyle = "#FFFF00";
-        break;
-        } 
+            case 0:
+                ctx.fillStyle = "#FF0000";
+                break;
+            case 1:
+                ctx.fillStyle = "#00FF00";
+                break;
+            case 2:
+                ctx.fillStyle = "#0000FF";
+                break;
+            case 3:
+                ctx.fillStyle = "#FFFF00";
+                break;
+        }
+        ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(
             xval,
@@ -94,6 +104,7 @@ requestAnimationFrame(function draw() {
         );
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = "#dbdbdb";
         if (entities[count].health / entities[count].maxhealth < 1) {
             ctx.fillStyle = "#000000";
             ctx.fillRect(
@@ -122,25 +133,14 @@ requestAnimationFrame(function draw() {
     for (let c = 0; c < k.length; c++) {
         ctx.fillText(`${k[c].name} - ${k[c].score}`, window.innerWidth - 200, 20 * (c + 1));
     }
-    if (dead) {
-        ctx.textAlign = "center";
-        ctx.fillText(`You died`, window.innerWidth / 2, 220);
-        ctx.fillText(
-            `Score: ${player.score}`,
-            window.innerWidth / 2,
-            260
-        );
-        ctx.fillText(
-            `Press enter to return to menu`,
-            window.innerWidth / 2,
-            300
-        );
-        document.addEventListener("keydown", function(event) {
-            if (event.code === "Enter") {
-                this.location.href = "/";
-            }
-        });
+    ctx.textAlign = 'center';
+    for (let count in notifications) {
+        ctx.fillText(notifications[count].message, window.innerWidth / 2, font.size * 1.5 + count * font.size);
+    }
+    ctx.textAlign = 'left';
+    if (mode === 'vanquish') {
+        ctx.fillText(`Green: ${managegame.score[0]}`, 0, font.size * 3);
+        ctx.fillText(`Red: ${managegame.score[1]}`, 0, font.size * 4);
     }
     requestAnimationFrame(draw);
 });
-
