@@ -12,6 +12,7 @@ export let bodies = [
         2: 'chase',
         bdamage: 3,
         bspeed: 15,
+        bhealth: 30,
         fov: 750
     }],
 
@@ -22,6 +23,7 @@ export let bodies = [
         turnspeed: 0.01,
         bdamage: 10,
         bspeed: 15,
+        bhealth: 30,
         immovable: 1,
         fov: 750
     }],
@@ -34,13 +36,14 @@ export let bodies = [
         turnspeed: 0.01,
         bdamage: 3,
         bspeed: 15,
+        bhealth: 30,
         2: 'chase',
         fov: 750
     }],
 
     ['player', 'Sorcerer', playersize * 2, 1000, 10, 2, 0.1, 150, [
-        [0, 2.5 * playersize, 'Turret Minion'],
-        [Math.PI, 2.5 * playersize, 'Turret Minion']
+        [0, 2.5 * playersize, 'bot'],
+        [Math.PI, 2.5 * playersize, 'bot']
     ], {
         1: 'turn',
         turnspeed: 0.01,
@@ -55,7 +58,32 @@ export let bodies = [
         turnspeed: 0.01,
         bdamage: 5,
         bspeed: 15,
+        bhealth: 30,
         2: 'chase',
         fov: 750
-    }]
+    }],
+
+    ['player', 'dom', playersize * 2, 1000, 10, 1, 0, 15, [
+        [0, 4 * playersize]
+    ], {
+        1: 'instaface',
+        turnspeed: 0.01,
+        bdamage: 10,
+        bspeed: 15,
+        bhealth: 30,
+        immovable: 1,
+        fov: 750
+    }],
+
+    ['player', 'bot', playersize, 100, 10, 3, 0.1, 20, [
+        [0, 2 * playersize]
+    ], {
+        1: 'instaface',
+        turnspeed: 0.01,
+        bdamage: 5,
+        bspeed: 15,
+        bhealth: 30,
+        2: 'chase',
+        fov: 2000
+    }],
 ];
