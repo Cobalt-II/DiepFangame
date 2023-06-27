@@ -9,6 +9,7 @@ import {
     notifications
 } from "/js/notifications.js";
 
+let colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"];
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let font = {
@@ -78,20 +79,7 @@ requestAnimationFrame(function draw() {
                 ctx.restore();
             }
         }
-        switch (entities[count].team) {
-            case 0:
-                ctx.fillStyle = "#FF0000";
-                break;
-            case 1:
-                ctx.fillStyle = "#00FF00";
-                break;
-            case 2:
-                ctx.fillStyle = "#0000FF";
-                break;
-            case 3:
-                ctx.fillStyle = "#FFFF00";
-                break;
-        }
+        ctx.fillStyle = colors[entities[count].team];
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(
