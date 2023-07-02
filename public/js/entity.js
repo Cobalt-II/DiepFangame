@@ -324,8 +324,6 @@ export function setTank(type) {
     upgrades = [];
     if (upgradetree[`${playertype}`]) {
         upgrades = upgradetree[`${playertype}`];
-    } else {
-        upgrades = []
     };
     pushNote(`You have upgraded to ${type}.`, 3);
 }
