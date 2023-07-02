@@ -75,6 +75,41 @@ export let bodies = [
         fov: 750
     }],
 
+    ['bullet', 'twist', 0.5 * playersize, 30, 10, 5, 0, 20, [
+        [0, playersize * 0.75],
+        [Math.PI / 2, playersize * 0.75],
+        [2 * Math.PI / 2, playersize * 0.75],
+        [3 * Math.PI / 2, playersize * 0.75]
+    ], {
+        1: 'turn',
+        turnspeed: 0.01,
+        bdamage: 10,
+        bspeed: 15,
+        bhealth: 30
+    }],
+
+    ['bullet', 'flank', 0.5 * playersize, 30, 10, 5, 0, 20, [
+        [0, playersize * 0.75],
+        [Math.PI, playersize * 0.75],
+    ], {
+        1: 'turn',
+        turnspeed: 0.01,
+        bdamage: 10,
+        bspeed: 15,
+        bhealth: 30
+    }],
+
+    ['bullet', 'missile', 0.5 * playersize, 30, 10, 5, 0, 20, [
+        [0, playersize * 0.75]
+    ], {
+        1: 'face',
+        2: 'chase',
+        turnspeed: 0.01,
+        bdamage: 10,
+        bspeed: 15,
+        bhealth: 10
+    }],
+
     ['player', 'bot', playersize, 100, 10, 3, 0.1, 20, [
         [0, 2 * playersize]
     ], {
