@@ -501,19 +501,17 @@ requestAnimationFrame(function run() {
                         )
                     );
                     let scale = entities[count].size / entities[coun].size;
+                    let sine = Math.sin(angle);
+                    let cosine = Math.cos(angle);
                     if (entities[count].x < entities[coun].x) {
-                        if (!entities[count].behaviors.immovable) entities[count].x -= Math.cos(angle) * entities[count].speed / scale;
-                        if (!entities[coun].behaviors.immovable) entities[coun].x += Math.cos(angle) * entities[coun].speed / scale;
+                        if (!entities[count].behaviors.immovable) entities[count].x += cosine * entities[count].speed / scale;
                     } else {
-                        if (!entities[count].behaviors.immovable) entities[count].x += Math.cos(angle) * entities[count].speed / scale;
-                        if (!entities[coun].behaviors.immovable) entities[coun].x -= Math.cos(angle) * entities[coun].speed / scale;
+                        if (!entities[count].behaviors.immovable) entities[count].x += cosine * entities[count].speed / scale;
                     }
                     if (entities[count].y < entities[coun].y) {
-                        if (!entities[count].behaviors.immovable) entities[count].y -= Math.sin(angle) * entities[count].speed / scale;
-                        if (!entities[coun].behaviors.immovable) entities[coun].y += Math.sin(angle) * entities[coun].speed / scale;
+                        if (!entities[count].behaviors.immovable) entities[count].y -= sine * entities[count].speed / scale;
                     } else {
-                        if (!entities[count].behaviors.immovable) entities[count].y += Math.sin(angle) * entities[count].speed / scale;
-                        if (!entities[coun].behaviors.immovable) entities[coun].y -= Math.sin(angle) * entities[coun].speed / scale;
+                        if (!entities[count].behaviors.immovable) entities[count].y += sine * entities[count].speed / scale;
                     }
                 }
             }
