@@ -504,14 +504,14 @@ requestAnimationFrame(function run() {
                     let sine = Math.sin(angle);
                     let cosine = Math.cos(angle);
                     if (entities[count].x < entities[coun].x) {
-                        if (!entities[count].behaviors.immovable) entities[count].x += cosine * entities[count].speed / scale;
+                        entities[count].x += cosine * entities[count].speed;
                     } else {
-                        if (!entities[count].behaviors.immovable) entities[count].x += cosine * entities[count].speed / scale;
+                        entities[count].x += cosine * entities[count].speed;
                     }
                     if (entities[count].y < entities[coun].y) {
-                        if (!entities[count].behaviors.immovable) entities[count].y -= sine * entities[count].speed / scale;
+                        entities[count].y -= sine * entities[count].speed;
                     } else {
-                        if (!entities[count].behaviors.immovable) entities[count].y += sine * entities[count].speed / scale;
+                        entities[count].y += sine * entities[count].speed;
                     }
                 }
             }
