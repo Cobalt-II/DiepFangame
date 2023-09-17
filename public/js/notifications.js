@@ -10,21 +10,15 @@ class notification {
 
 export let notifications = [];
 
-requestAnimationFrame(function clear() {
-    for (let count in notifications) {
-        let k = notifications[count].id;
-        setTimeout(() => {
-            for (let count in notifications) {
-                if (notifications[count].id === k) {
-                    notifications.splice(count, 1)
-                }
-            }
-        }, notifications[count].duration * 1000);
-    }
-    requestAnimationFrame(clear);
-});
-
 export function pushNote(message, duration) {
     notifications.push(new notification(message, duration, id));
+    let o = id;
     id++;
+    setTimeout(() => {
+        for (let count in notifications) {
+            if (notifications[count].id === o) {
+                notifications.splice(count, 1)
+            }
+        }
+    }, duration * 1000);
 };
